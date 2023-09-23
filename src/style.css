@@ -1,0 +1,30 @@
+.div {
+  display: flex;
+  width: 350px;
+  height: 200px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 15px;
+  outline: 1px solid rgba(46, 45, 45, 0.3);
+  margin-right: 50px;
+  font-weight: 600;
+  font-size: 16px;
+
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #000;
+  border-radius: 4px;
+  background-color: rgba(223, 125, 125, 0);
+  color: #801919;
+
+  width: 75px;
+  padding: 10px 5px;
+  font-size: 14px;
+  background-color: #011;
+  color: #0004ff;
+  cursor: pointer;
+  border-radius: 7px;
+  border: #0004ff;
+  cursor: pointer;
+}
