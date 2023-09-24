@@ -1,38 +1,23 @@
+import { useEffect, useState } from 'react';
 import { Filter } from 'components/Filter/Filter';
 import { Notification } from 'components/Notification/Notification';
 import { nanoid } from 'nanoid';
-import { Component } from 'react';
 import { ContactForm } from '../ContactForm/ContactForm';
 import { ContactList } from '../ContactList/contactList';
 import { MainTitle, SecondTitle } from './App.styled';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
-  //  [
-  //   {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
-  //   {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
-  //   {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
-  //   {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
-  // ]
+export const App = () => {
+  const [contacts, setContacts] = useState(
+    JSON.parse(localStorage.getItem('contacts')) ?? []
+  );
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    const savedDataContacts = localStorage.getItem('contacts');
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-    if (savedDataContacts) {
-      this.setState({ contacts: JSON.parse(savedDataContacts) });
-    }
-  }
-  componentDidUpdate(_, prevState) {
-    if (prevState.contacts.length !== this.state.contacts.length) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-
-  addContact = dataContact => {
-    const haveContactAlready = this.state.contacts.find(
+  const addContact = dataContact => {
+    const haveContactAlready = contacts.some(
       contact => contact.name.toLowerCase() === dataContact.name.toLowerCase()
     );
 
@@ -44,54 +29,43 @@ export class App extends Component {
       id: nanoid(),
     };
 
-    this.setState(prevState => ({
-      contacts: [newContact, ...prevState.contacts],
-    }));
+    setContacts(prevContacts => [newContact, ...prevContacts]);
   };
 
-  inputFilterShift = ({ target: { value } }) => {
-    this.setState({
-      filter: value,
-    });
+  const inputFilterShift = ({ target: { value } }) => {
+    setFilter(value);
   };
 
-  getFilteredContacts = () => {
-    const { contacts, filter } = this.state;
+  const getFilteredContacts = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase())
     );
   };
 
-  deleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
-  };
-
-  render() {
-    // const { contacts } = this.state;
-    const filteredContacts = this.getFilteredContacts();
-    return (
-      <div>
-        <MainTitle>Phonebook</MainTitle>
-        <ContactForm addContact={this.addContact} />
-        <SecondTitle>Contacts</SecondTitle>
-        <Filter
-          inputFilterShift={this.inputFilterShift}
-          filter={this.state.filter}
-        />
-        <div>
-          {this.getFilteredContacts().length > 0 ? (
-            <ContactList
-              contacts={filteredContacts}
-              filter={this.state.filter}
-              onDeleteContact={this.deleteContact}
-            />
-          ) : (
-            <Notification message="There are no contacts in this list" />
-          )}
-        </div>
-      </div>
+  const deleteContact = contactId => {
+    setContacts(prevContacts =>
+      prevContacts.filter(contact => contact.id !== contactId)
     );
-  }
-}
+  };
+  const filteredContacts = getFilteredContacts();
+
+  return (
+    <div>
+      <MainTitle>Phonebook</MainTitle>
+      <ContactForm addContact={addContact} />
+      <SecondTitle>Contacts</SecondTitle>
+      <Filter inputFilterShift={inputFilterShift} filter={filter} />
+      <div>
+        {filteredContacts.length > 0 ? (
+          <ContactList
+            contacts={filteredContacts}
+            filter={filter}
+            onDeleteContact={deleteContact}
+          />
+        ) : (
+          <Notification message="There are no contacts in this list" />
+        )}
+      </div>
+    </div>
+  );
+};

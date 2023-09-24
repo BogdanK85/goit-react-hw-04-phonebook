@@ -1,5 +1,5 @@
 import { validateForm } from 'helpers/validationForm';
-import { Component } from 'react';
+import { useState } from 'react';
 import {
   ButtonAddContact,
   FormStyled,
@@ -7,72 +7,73 @@ import {
   Label,
 } from './ContactForm.styled';
 
-export class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
+export const ContactForm = ({ addContact }) => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+  const [, setErrors] = useState({});
+
+  const clearForm = () => {
+    setName('');
+    setNumber('');
   };
 
-  handleFormInput = evt => {
-    if (evt.target.name === 'number') {
-      if (!/^\d+$/.test(evt.target.value)) {
-        return;
-      }
+  const handleFormInput = evt => {
+    const { name, value } = evt.target;
+
+    if (name === 'number' && !/^\d+$/.test(value)) {
+      return;
     }
-    this.setState({
-      [evt.target.name]: evt.target.value,
-    });
+
+    if (name === 'name') {
+      setName(value);
+    } else if (name === 'number') {
+      setNumber(value);
+    }
   };
 
-  handleFormSubmit = evt => {
+  const handleFormSubmit = evt => {
     evt.preventDefault();
-    const { name, number } = this.state;
-    const errors = validateForm(name, number);
 
-    if (Object.values(errors).every(errors => errors === '')) {
-      this.props.addContact(this.state);
-      this.clearForm();
+    const validationErrors = validateForm(name, number);
+
+    if (Object.values(validationErrors).every(errors => errors === '')) {
+      addContact({ name, number });
+      clearForm();
+      setErrors({});
     } else {
-      this.setState({ errors });
+      setErrors({ validationErrors });
     }
   };
 
-  clearForm = () => {
-    this.setState({ name: '', number: '' });
-  };
-
-  render() {
-    // const { name, number } = this.state;
-    return (
-      <FormStyled onSubmit={this.handleFormSubmit}>
-        <Label>
-          Name
-          <Input
-            onChange={this.handleFormInput}
-            value={this.state.name}
-            type="text"
-            name="name"
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-            required
-            placeholder="name"
-          />
-        </Label>
-        <Label>
-          Number
-          <Input
-            onChange={this.handleFormInput}
-            value={this.state.number}
-            type="tel"
-            name="number"
-            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-            required
-            placeholder="number"
-          />
-        </Label>
-        <ButtonAddContact type="submit">Add contact</ButtonAddContact>
-      </FormStyled>
-    );
-  }
-}
+  return (
+    <FormStyled onSubmit={handleFormSubmit}>
+      <Label>
+        Name
+        <Input
+          onChange={handleFormInput}
+          value={name}
+          type="text"
+          name="name"
+          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+          required
+          placeholder="name"
+        />
+      </Label>
+      <Label>
+        Number
+        <Input
+          onChange={handleFormInput}
+          value={number}
+          type="tel"
+          name="number"
+          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+          required
+          placeholder="number"
+        />
+      </Label>
+      <ButtonAddContact type="submit">Add contact</ButtonAddContact>
+    </FormStyled>
+  );
+};
